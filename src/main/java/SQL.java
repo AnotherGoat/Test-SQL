@@ -8,7 +8,7 @@ public class SQL {
     static final String DB_URL = "jdbc:mysql://localhost/Comida";
     // usuario y contraseña de la base de datos
     static final String USER = "root";
-    static final String PASS = "1234";
+    static final String PASS = "";
 
     public static Scanner teclado = new Scanner(System.in);
 
@@ -24,10 +24,11 @@ public class SQL {
             System.out.println("Conectando a la base de datos...");
             conn = DriverManager.getConnection(DB_URL,USER,PASS);
 
-            menu();
+            mostrarResultados();
+            insertarNuevaPìzza();
 
             //Paso 6: Limpiar
-
+            //Paso 6: Limpiar
             stmt.close();
             conn.close();
         }catch(SQLException se){
@@ -52,7 +53,7 @@ public class SQL {
         }
         System.out.println("Adios!");
     }
-
+    /*
     public static void menu() throws SQLException {
 
         int eleccion = -1;
@@ -89,12 +90,31 @@ public class SQL {
         } while(eleccion!=0);
 
     }
+    */
 
+    public static void insertarNuevaPìzza() throws SQLException{
+        ResultSet rs = consultar("SELECT COUNT(*) FROM pizza");
+        int codigoPizza=0;
+        if (rs.next()) codigoPizza = rs.getInt(1) + 1;
+        System.out.println("Ingrese una nueva Pizza, codigo de la nueva pizza: "+codigoPizza);
+        System.out.print("Ingrese el nombre de la Pizza: ");
+        String nombrePizza = teclado.nextLine();
+        System.out.print("Ingrese el precio de la Pizza: ");
+        int precioPizza = teclado.nextInt();
+        String sqlNuevaPizza = "INSERT INTO Pizza VALUES ("+codigoPizza+","+precioPizza+",\'"+nombrePizza+"\');";
+        insertar(sqlNuevaPizza);
+        System.out.println("Se ha insertado la pizza");
+
+    }
     public static ResultSet consultar(String sql) throws SQLException {
         //Paso 4: Ejecutar una consulta
         System.out.println("Creando declaracion...");
         stmt = conn.createStatement();
         return stmt.executeQuery(sql);
+    }
+
+    public static void insertar(String sql)throws SQLException{
+        stmt.executeUpdate(sql);
     }
     /*
     // Caso 1
@@ -105,8 +125,24 @@ public class SQL {
         return stmt.executeQuery(sql);
     }*/
 
-    public static void mostrarResultados(ResultSet rs) {
+    public static void mostrarResultados() throws SQLException{
 
-    }
+        ResultSet rs = consultar("SELECT * FROM Pizza");
+        System.out.println("Las pizzas disponibles son: ");
+        //Paso 5: Extraer datos del resultado
+        while(rs.next()){
+            //Recuperar por el nombre de la columna
+            int codigoPizza = rs.getInt("codigoPizza");
+            int valorPizza = rs.getInt("valorPizza");
+            String nombrePizza = rs.getString("nombrePizza");
+            //Mostar resultados
+            System.out.print("Codigo: " + codigoPizza);
+            System.out.print(", Valor: " + valorPizza);
+            System.out.println(", Nombre: " + nombrePizza);
+
+        }
+
+
+}
 
 }
