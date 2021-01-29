@@ -8,7 +8,7 @@ public class SQL {
     static final String DB_URL = "jdbc:mysql://localhost/Comida";
     // usuario y contraseña de la base de datos
     static final String USER = "root";
-    static final String PASS = "";
+    static final String PASS = "1234";
 
     public static Scanner teclado = new Scanner(System.in);
 
@@ -25,9 +25,9 @@ public class SQL {
             conn = DriverManager.getConnection(DB_URL,USER,PASS);
 
             mostrarResultados();
-            insertarNuevaPìzza();
+            actualizarPìzza();
+            mostrarResultados();
 
-            //Paso 6: Limpiar
             //Paso 6: Limpiar
             stmt.close();
             conn.close();
@@ -92,20 +92,35 @@ public class SQL {
     }
     */
 
-    public static void insertarNuevaPìzza() throws SQLException{
-        ResultSet rs = consultar("SELECT COUNT(*) FROM pizza");
-        int codigoPizza=0;
-        if (rs.next()) codigoPizza = rs.getInt(1) + 1;
-        System.out.println("Ingrese una nueva Pizza, codigo de la nueva pizza: "+codigoPizza);
+    public static void actualizarPìzza() throws SQLException{
+
+        int codigoPizza;
+
+
+        System.out.println("Ingrese el código de la pizza que desea modificar: ");
+        codigoPizza = teclado.nextInt();
+        teclado.next();
+
         System.out.print("Ingrese el nombre de la Pizza: ");
         String nombrePizza = teclado.nextLine();
-        System.out.print("Ingrese el precio de la Pizza: ");
+        teclado.next();
+
+        System.out.print("\nIngrese el precio de la Pizza: ");
         int precioPizza = teclado.nextInt();
-        String sqlNuevaPizza = "INSERT INTO Pizza VALUES ("+codigoPizza+","+precioPizza+",\'"+nombrePizza+"\');";
-        insertar(sqlNuevaPizza);
-        System.out.println("Se ha insertado la pizza");
+
+        String sql = "update Pizza set nombrePizza=?, valorPizza=? where codigoPizza=?";
+        PreparedStatement preparedStmt = conn.prepareStatement(sql);
+        preparedStmt.setString (1, nombrePizza); // es el dato para el atributo1 si es entero
+        preparedStmt.setInt (2, precioPizza); //es el dato para el atributo2 si es string
+        preparedStmt.setInt (3, codigoPizza);
+        preparedStmt.executeUpdate();
+
+        System.out.println("Se ha actualizado la pizza");
 
     }
+
+
+
     public static ResultSet consultar(String sql) throws SQLException {
         //Paso 4: Ejecutar una consulta
         System.out.println("Creando declaracion...");
@@ -113,9 +128,6 @@ public class SQL {
         return stmt.executeQuery(sql);
     }
 
-    public static void insertar(String sql)throws SQLException{
-        stmt.executeUpdate(sql);
-    }
     /*
     // Caso 1
     public static ResultSet select() throws SQLException {
