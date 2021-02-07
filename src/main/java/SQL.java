@@ -9,11 +9,11 @@ public class SQL {
     // URL del driver JDBC y de la base de datos
     private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private final String DB_URL = "jdbc:mysql://localhost/Comida";
-
+    
     // Usuario y contraseña de la base de datos
     private final String USER = "root";
     private final String PASS = "1234";
-
+    
     // Objetos para hacer la conexión
     private Connection conn = null;
     private Statement stmt = null;
