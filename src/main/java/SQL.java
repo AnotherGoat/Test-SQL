@@ -1,20 +1,122 @@
-//Paso 1. Importar los paquetes requeridos
+
+// Importar los paquetes requeridos
 import java.sql.*;
 import java.util.Scanner;
 
 public class SQL {
-    // url del driver JDBC y la base de datos
-    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://localhost/Comida";
-    // usuario y contraseña de la base de datos
-    static final String USER = "root";
-    static final String PASS = "1234";
 
-    public static Scanner teclado = new Scanner(System.in);
+    /* Atributos */
+    // URL del driver JDBC y de la base de datos
+    private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private final String DB_URL = "jdbc:mysql://localhost/Comida";
+    // Usuario y contraseña de la base de datos
+    private final String USER = "root";
+    private final String PASS = "1234";
+    // Scanner
+    private Scanner teclado;
 
-    static Connection conn = null;
-    static Statement stmt = null;
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
+    private String sql = null;
 
+    /* Constructores */
+    public SQL() {
+        this.teclado = new Scanner(System.in);
+
+        try {
+            conectar();
+            menu();
+            desconectar();
+        } catch (SQLException e) {
+            System.out.println("Error SQL: " + e);
+        } catch (ClassNotFoundException f) {
+            System.out.println("Clase no encontrada: " + f);
+        }
+    }
+
+    /* Métodos */
+    private void conectar() throws SQLException, ClassNotFoundException {
+        // Carga el driver JDBC
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        // Abre una conexión
+        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+    }
+
+    private void desconectar() throws SQLException {
+        // Liberar memoria
+        rs.close();
+        stmt.close();
+        conn.close();
+    }
+
+    private void menu() throws SQLException {
+
+        int eleccion = -1;
+        System.out.println("Bienvenido a la base de datos Comida");
+
+        do {
+            System.out.println("\nOpciones:");
+            System.out.println("1 - Ver pizzas");
+            System.out.println("2 - Insertar una pizza");
+            System.out.println("3 - Editar una pizza");
+            System.out.println("0 - Salir");
+
+            System.out.print("\nEscoja una opción: ");
+
+            eleccion = teclado.nextInt();
+
+            switch (eleccion) {
+                case 1:
+                    select();
+                    break;
+                case 2:
+                    insert();
+                    break;
+                case 3:
+                    update();
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Opción no válida");
+            }
+
+        } while (eleccion != 0);
+    }
+
+    private void select() throws SQLException {
+        System.out.println("\nCreando declaracion...");
+        stmt = conn.createStatement();
+        String sql = "SELECT * FROM Pizza";
+        rs = stmt.executeQuery(sql);
+
+        System.out.println("\nLas pizzas disponibles son: ");
+
+        // Extraer datos del resultado
+        while (rs.next()) {
+            // Recuperar por el nombre de la columna
+            int codigoPizza = rs.getInt("codigoPizza");
+            int valorPizza = rs.getInt("valorPizza");
+            String nombrePizza = rs.getString("nombrePizza");
+
+            // Mostar resultados
+            System.out.print("Código: " + codigoPizza);
+            System.out.print(", Valor: " + valorPizza);
+            System.out.println(", Nombre: " + nombrePizza);
+
+        }
+    }
+
+    private void insert() {
+
+    }
+
+    private void update() {
+
+    }
+
+/*
     public static void main(String[] args) {
 
         try{
@@ -53,44 +155,8 @@ public class SQL {
         }
         System.out.println("Adios!");
     }
-    /*
-    public static void menu() throws SQLException {
 
-        int eleccion = -1;
 
-        do {
-            System.out.println("Bienvenido a la base de datos");
-
-            System.out.println("Escoja una opción:");
-            System.out.println("1 - Ver pizzas");
-            System.out.println("2 - Eliminar una pizza");
-            System.out.println("3 - Insertar una pizza");
-            System.out.println("4 - Editar una pizza");
-            System.out.println("0 - Salir");
-
-            eleccion = teclado.nextInt();
-
-            switch(eleccion) {
-                case 1:
-                    ResultSet rs = consultar("SELECT * FROM Pizza");
-                    System.out.println(rs.toString());
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opción no válida");
-            }
-
-        } while(eleccion!=0);
-
-    }
-    */
 
     public static void actualizarPìzza() throws SQLException{
 
@@ -121,12 +187,7 @@ public class SQL {
 
 
 
-    public static ResultSet consultar(String sql) throws SQLException {
-        //Paso 4: Ejecutar una consulta
-        System.out.println("Creando declaracion...");
-        stmt = conn.createStatement();
-        return stmt.executeQuery(sql);
-    }
+
 
     /*
     // Caso 1
@@ -136,25 +197,13 @@ public class SQL {
         stmt = conn.createStatement();
         return stmt.executeQuery(sql);
     }*/
-
+/*
     public static void mostrarResultados() throws SQLException{
 
         ResultSet rs = consultar("SELECT * FROM Pizza");
-        System.out.println("Las pizzas disponibles son: ");
-        //Paso 5: Extraer datos del resultado
-        while(rs.next()){
-            //Recuperar por el nombre de la columna
-            int codigoPizza = rs.getInt("codigoPizza");
-            int valorPizza = rs.getInt("valorPizza");
-            String nombrePizza = rs.getString("nombrePizza");
-            //Mostar resultados
-            System.out.print("Codigo: " + codigoPizza);
-            System.out.print(", Valor: " + valorPizza);
-            System.out.println(", Nombre: " + nombrePizza);
-
-        }
 
 
-}
+
+}*/
 
 }
