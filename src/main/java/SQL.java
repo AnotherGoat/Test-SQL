@@ -12,13 +12,18 @@ public class SQL {
     // Usuario y contraseña de la base de datos
     private final String USER = "root";
     private final String PASS = "1234";
-    // Scanner
-    private Scanner teclado;
-
+    // Objetos para hacer la conexión
     private Connection conn = null;
     private Statement stmt = null;
+    private PreparedStatement pstm = null;
     private ResultSet rs = null;
-    private String sql = null;
+    private String sql;
+    // Datos de la pizza
+    private int codigoPizza;
+    private String nombrePizza;
+    private int valorPizza;
+    // Scanner
+    private Scanner teclado;
 
     /* Constructores */
     public SQL() {
@@ -27,11 +32,15 @@ public class SQL {
         try {
             conectar();
             menu();
-            desconectar();
+            limpiar();
         } catch (SQLException e) {
-            System.out.println("Error SQL: " + e);
+            // Error de SQL
+            System.out.println("Error SQL:");
+            e.printStackTrace();
         } catch (ClassNotFoundException f) {
-            System.out.println("Clase no encontrada: " + f);
+            // Error de Class.forName
+            System.out.println("Clase no encontrada:");
+            f.printStackTrace();
         }
     }
 
@@ -43,15 +52,23 @@ public class SQL {
         conn = DriverManager.getConnection(DB_URL,USER,PASS);
     }
 
-    private void desconectar() throws SQLException {
+    private void limpiar() throws SQLException {
         // Liberar memoria
-        rs.close();
-        stmt.close();
-        conn.close();
+        if (rs != null) {
+            rs.close();
+        }
+        if (stmt != null) {
+            stmt.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
     }
 
     private void menu() throws SQLException {
-
         int eleccion = -1;
         System.out.println("Bienvenido a la base de datos Comida");
 
@@ -59,12 +76,13 @@ public class SQL {
             System.out.println("\nOpciones:");
             System.out.println("1 - Ver pizzas");
             System.out.println("2 - Insertar una pizza");
-            System.out.println("3 - Editar una pizza");
+            System.out.println("3 - Actualizar una pizza");
             System.out.println("0 - Salir");
 
             System.out.print("\nEscoja una opción: ");
 
             eleccion = teclado.nextInt();
+            teclado.nextLine();
 
             switch (eleccion) {
                 case 1:
@@ -77,6 +95,7 @@ public class SQL {
                     update();
                     break;
                 case 0:
+                    System.out.println("¡Adiós!");
                     break;
                 default:
                     System.out.println("Opción no válida");
@@ -86,9 +105,9 @@ public class SQL {
     }
 
     private void select() throws SQLException {
-        System.out.println("\nCreando declaracion...");
+        System.out.println("\nCreando declaración...");
         stmt = conn.createStatement();
-        String sql = "SELECT * FROM Pizza";
+        String sql = "SELECT * FROM pizza";
         rs = stmt.executeQuery(sql);
 
         System.out.println("\nLas pizzas disponibles son: ");
@@ -104,106 +123,56 @@ public class SQL {
             System.out.print("Código: " + codigoPizza);
             System.out.print(", Valor: " + valorPizza);
             System.out.println(", Nombre: " + nombrePizza);
-
         }
     }
 
-    private void insert() {
-
-    }
-
-    private void update() {
-
-    }
-
-/*
-    public static void main(String[] args) {
-
-        try{
-            //Paso 2: Cargar driver JDBC
-            Class.forName("com.mysql.jdbc.Driver");
-            //Paso 3: Abrir una conexion
-            System.out.println("Conectando a la base de datos...");
-            conn = DriverManager.getConnection(DB_URL,USER,PASS);
-
-            mostrarResultados();
-            actualizarPìzza();
-            mostrarResultados();
-
-            //Paso 6: Limpiar
-            stmt.close();
-            conn.close();
-        }catch(SQLException se){
-            //Errores de jdbc
-            se.printStackTrace();
-        }catch(Exception e){
-            //Errores de Class.forName
-            e.printStackTrace();
-        }finally{
-            //bloque usado para cerrar recursos
-            try{
-                if(stmt!=null)
-                    stmt.close();
-            }catch(SQLException se2){
-            }// nada que hacer
-            try{
-                if(conn!=null)
-                    conn.close();
-            }catch(SQLException se){
-                se.printStackTrace();
-            }
-        }
-        System.out.println("Adios!");
-    }
-
-
-
-    public static void actualizarPìzza() throws SQLException{
-
-        int codigoPizza;
-
-
-        System.out.println("Ingrese el código de la pizza que desea modificar: ");
+    private void insert() throws SQLException {
+        System.out.print("Ingrese el código de la nueva pizza: ");
         codigoPizza = teclado.nextInt();
-        teclado.next();
+        teclado.nextLine();
 
-        System.out.print("Ingrese el nombre de la Pizza: ");
-        String nombrePizza = teclado.nextLine();
-        teclado.next();
+        System.out.print("Ingrese el nombre de la pizza: ");
+        nombrePizza = teclado.nextLine();
 
-        System.out.print("\nIngrese el precio de la Pizza: ");
-        int precioPizza = teclado.nextInt();
+        System.out.print("Ingrese el precio de la pizza: ");
+        valorPizza = teclado.nextInt();
+        teclado.nextLine();
 
-        String sql = "update Pizza set nombrePizza=?, valorPizza=? where codigoPizza=?";
-        PreparedStatement preparedStmt = conn.prepareStatement(sql);
-        preparedStmt.setString (1, nombrePizza); // es el dato para el atributo1 si es entero
-        preparedStmt.setInt (2, precioPizza); //es el dato para el atributo2 si es string
-        preparedStmt.setInt (3, codigoPizza);
-        preparedStmt.executeUpdate();
+        System.out.println("\nCreando declaración...");
+        sql = "INSERT INTO Pizza VALUES (?, ?, ?)";
+
+        // Crea el prepared statement
+        pstm = conn.prepareStatement(sql);
+        pstm.setInt (1, codigoPizza);
+        pstm.setInt (2, valorPizza);
+        pstm.setString (3, nombrePizza);
+        pstm.executeUpdate();
+
+        System.out.println("Se ha ingresado la pizza");
+    }
+
+    private void update() throws SQLException {
+        System.out.print("Ingrese el código de la pizza que desea modificar: ");
+        codigoPizza = teclado.nextInt();
+        teclado.nextLine();
+
+        System.out.print("Ingrese el nombre de la pizza: ");
+        nombrePizza = teclado.nextLine();
+
+        System.out.print("Ingrese el precio de la pizza: ");
+        valorPizza = teclado.nextInt();
+        teclado.nextLine();
+
+        System.out.println("\nCreando declaración...");
+        sql = "UPDATE Pizza SET nombrePizza=?, valorPizza=? WHERE codigoPizza=?";
+
+        // Crea el prepared statement
+        pstm = conn.prepareStatement(sql);
+        pstm.setString (1, nombrePizza);
+        pstm.setInt (2, valorPizza);
+        pstm.setInt (3, codigoPizza);
+        pstm.executeUpdate();
 
         System.out.println("Se ha actualizado la pizza");
-
     }
-
-
-
-
-
-    /*
-    // Caso 1
-    public static ResultSet select() throws SQLException {
-        //Paso 4: Ejecutar una consulta
-        System.out.println("Creando declaracion...");
-        stmt = conn.createStatement();
-        return stmt.executeQuery(sql);
-    }*/
-/*
-    public static void mostrarResultados() throws SQLException{
-
-        ResultSet rs = consultar("SELECT * FROM Pizza");
-
-
-
-}*/
-
 }
