@@ -5,15 +5,16 @@ import java.util.Scanner;
 
 public class SQL {
 
-    /* Atributos */
+    /* Constantes */
     // URL del driver JDBC y de la base de datos
     private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private final String DB_URL = "jdbc:mysql://localhost/Comida";
-    
+
     // Usuario y contraseña de la base de datos
     private final String USER = "root";
     private final String PASS = "1234";
-    
+
+    /* Atributos */
     // Objetos para hacer la conexión
     private Connection conn = null;
     private Statement stmt = null;
@@ -25,7 +26,7 @@ public class SQL {
     private int codigoPizza;
     private String nombrePizza;
     private int valorPizza;
-    
+
     // Scanner
     private Scanner teclado;
 
@@ -51,9 +52,9 @@ public class SQL {
     /* Métodos */
     private void conectar() throws SQLException, ClassNotFoundException {
         // Carga el driver JDBC
-        Class.forName("com.mysql.cj.jdbc.Driver");
+        Class.forName(JDBC_DRIVER);
         // Abre una conexión
-        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+        conn = DriverManager.getConnection(DB_URL, USER, PASS);
     }
 
     private void limpiar() throws SQLException {
@@ -73,7 +74,7 @@ public class SQL {
     }
 
     private void menu() throws SQLException {
-        int eleccion = -1;
+        int eleccion;
         System.out.println("Bienvenido a la base de datos Comida");
 
         do {
